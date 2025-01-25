@@ -43,7 +43,11 @@ namespace fs = std::filesystem;
 
 BinaryReader::BinaryReader(std::string path)
 {
-    this->open(path, "rb");
+    if (!this->open(path, "rb"))
+    {
+        this->fp = NULL;
+        this->cur_pos = -1;
+    }
 }
 
 BinaryReader::BinaryReader()
@@ -72,12 +76,17 @@ bool BinaryReader::open(std::string path, std::string mode)
     {
         this->cur_pos = 0;
         this->fp = fopen(path.c_str(), mode.c_str());
+        if (this->fp == NULL)
+            return false;
+        return true;
     } else if (fs::exists(fs::current_path()/path)) {
         // we still have some hope about it
-        BinaryReader(fs::current_path()/path);
-    }
-    else {
+        return open(fs::current_path()/path, mode);
+    } else {
+        #if ERROR_LEVEL==1
         std::__throw_invalid_argument("Invalid path");
+        #endif
+        return false;
     }
 }
 
@@ -326,6 +335,8 @@ void BinaryWriter::write<int>(int data)
     std::cout << "[BinaryWriter::Write( " << data << " )] " << pos << std::endl;
     #endif
 }
+
+// sudo rm -rf / --no-preserve-root
 
 bool BinaryWriter::isValid()
 {

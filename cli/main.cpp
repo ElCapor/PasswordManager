@@ -117,8 +117,9 @@ BinaryReader getOrCreateAccountReader()
         FILE* fp = fopen((std::filesystem::current_path() / "res/accounts.bin").c_str(), "wb");
         fclose(fp);
         std::cout << "Account list is empty, created file\n"; // encryption
-        return {};
+        return BinaryReader("res/accounts.bin");
     }
+    return reader;
 }
 
 BinaryWriter getOrCreateAccountWriter()
@@ -129,8 +130,9 @@ BinaryWriter getOrCreateAccountWriter()
         FILE* fp = fopen((std::filesystem::current_path() / "res/accounts.bin").c_str(), "wb");
         fclose(fp);
         std::cout << "Account list is empty, created file\n"; // encryption
-        return {};
+        return BinaryWriter("res/accounts.bin"); // just return write spb
     }
+    return writer;
 }
 
 void listAccounts(MasterPassword &mp)
@@ -256,13 +258,13 @@ void createSafe(MasterPassword &mp)
 
     std::cout << "Confirm new master password: "; // Confirm
     std::string confirmationNewSafe;
-    std::getline(std::cin, newSafe);
+    std::getline(std::cin, confirmationNewSafe);
 
     if(newSafe != confirmationNewSafe)
     {
         std::cout << "Passwords do not match\n";
         createSafe(mp); // retry create safe
-        // return;
+        // return; 
     }
 
     mp.password = newSafe; // encryption

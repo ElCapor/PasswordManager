@@ -15,6 +15,11 @@ target("cli")
     add_includedirs("cli/include")
     add_includedirs("core/include")
 
-    after_build(function (target)
-         os.cp(os.scriptdir().."/res", target:targetdir())
-    end)
+    local remove = true
+    if remove then 
+        after_build(function (target)
+            os.rm(target:targetdir().."/res/master.bin")
+            os.rm(target:targetdir().."/res/accounts.bin")
+            os.cp(os.scriptdir().."/res", target:targetdir())
+        end)
+    end
