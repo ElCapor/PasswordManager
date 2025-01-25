@@ -140,13 +140,73 @@ T BinaryReader::read()
 }
 
 template <>
+int BinaryReader::read<int>()
+{
+    FATAL_CHECK_FILE(this->fp, 0);
+    int buff;
+    fread(&buff, sizeof(int), 1, this->fp);
+    fpos_t pos;
+    FCALL(fgetpos, this->fp, &pos);
+    this->cur_pos = pos;
+    #ifdef BINARY_VERBOSE
+    std::cout << "[BinaryReader::Read()] " << std::hex << buff << " pos : " << std::dec << pos << std::endl;
+    #endif
+    return buff;
+}
+
+template <>
+char BinaryReader::read<char>()
+{
+    FATAL_CHECK_FILE(this->fp, 0);
+    char buff;
+    fread(&buff, sizeof(char), 1, this->fp);
+    fpos_t pos;
+    FCALL(fgetpos, this->fp, &pos);
+    this->cur_pos = pos;
+    #ifdef BINARY_VERBOSE
+    std::cout << "[BinaryReader::Read()] " << std::hex << buff << " pos : " << std::dec << pos << std::endl;
+    #endif
+    return buff;
+}
+
+template <>
+float BinaryReader::read<float>()
+{
+    FATAL_CHECK_FILE(this->fp, 0);
+    float buff;
+    fread(&buff, sizeof(float), 1, this->fp);
+    fpos_t pos;
+    FCALL(fgetpos, this->fp, &pos);
+    this->cur_pos = pos;
+    #ifdef BINARY_VERBOSE
+    std::cout << "[BinaryReader::Read()] " << std::hex << buff << " pos : " << std::dec << pos << std::endl;
+    #endif
+    return buff;
+}
+
+template <>
+char* BinaryReader::read<char*>(size_t size)
+{
+    FATAL_CHECK_FILE(this->fp, 0);
+    char* buff = new char[size];
+    fread(buff, sizeof(char), size, this->fp);
+    fpos_t pos;
+    FCALL(fgetpos, this->fp, &pos);
+    this->cur_pos = pos;
+    #ifdef BINARY_VERBOSE
+    std::cout << "[BinaryReader::Read()] " << std::hex << buff << " pos : " << std::dec << pos << std::endl;
+    #endif
+    return buff;
+}
+
+template <>
 std::string BinaryReader::read<std::string>()
 {
     FATAL_CHECK_FILE(this->fp, "");
     int size;
-    char* buff = new char[size];
-    fread(&size, sizeof(int), 1, this->fp);
-    fread(buff, sizeof(char), size, this->fp);
+    char* buff = nullptr;
+    size = read<int>();
+    buff = read<char*>(size);
     std::string str(buff);
     delete[] buff;
     return str;
@@ -246,6 +306,19 @@ void BinaryWriter::write<std::string>(std::string data)
     int size = data.size();
     fwrite(&size, sizeof(int), 1, this->fp);
     fwrite(data.c_str(), sizeof(char), size, this->fp);
+    fpos_t pos;
+    FCALL(fgetpos, this->fp, &pos);
+    this->cur_pos = pos;
+    #ifdef BINARY_VERBOSE
+    std::cout << "[BinaryWriter::Write( " << data << " )] " << pos << std::endl;
+    #endif
+}
+
+template <>
+void BinaryWriter::write<int>(int data)
+{
+    FATAL_CHECK_FILE(this->fp);
+    fwrite(&data, sizeof(int), 1, this->fp);
     fpos_t pos;
     FCALL(fgetpos, this->fp, &pos);
     this->cur_pos = pos;

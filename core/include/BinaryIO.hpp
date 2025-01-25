@@ -22,6 +22,22 @@ public:
     template <>
     std::uint8_t read<std::uint8_t>();
 
+    template <>
+    int read<int>();
+
+    template <>
+    char read<char>();
+
+    template <>
+    float read<float>();
+
+    // some types like arrays we only want to read them with a size
+    template <typename T>
+    T read(size_t size);
+
+    template <>
+    char* read<char*>(size_t size);
+
     bool isValid();
 
     bool open(std::string path, std::string mode);
@@ -49,7 +65,11 @@ public:
     template <>
     void write<std::string>(std::string data);
 
+    template <>
+    void write<int>(int data);
+
     bool isValid();
+
 
     bool open(std::string path, std::string mode);
     void close();
