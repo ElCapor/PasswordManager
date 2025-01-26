@@ -112,13 +112,16 @@ public:
 BinaryReader getOrCreateAccountReader()
 {
     BinaryReader reader("res/accounts.bin");
-    if (!reader.isValid())
+    bool okay = reader.isValid();
+    reader.~BinaryReader(); // explicitly close the file
+
+    if (!okay)
     {
         FILE* fp = fopen((std::filesystem::current_path() / "res/accounts.bin").c_str(), "wb");
         fclose(fp);
         std::cout << "Account list is empty, created file\n"; // encryption
     }
-    return BinaryReader("res/accounts.bin");
+    return BinaryReader(std::filesystem::current_path()/"res/accounts.bin");
 }
 
 BinaryWriter getOrCreateAccountWriter()
@@ -267,6 +270,8 @@ void createSafe(MasterPassword &mp)
     }
 
     mp.password = newSafe; // encryption
+    BinaryWriter writer("res/master.bin");
+    mp.write(writer);
     
     unlockSafe(mp); // decryption
 }

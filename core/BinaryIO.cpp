@@ -70,6 +70,7 @@ BinaryReader::BinaryReader()
 
 BinaryReader::~BinaryReader()
 {
+    // when you try to create a binary reader on an invalid file, this will get triggered
     CHECK_FILE(this->fp);
     #ifdef BINARY_VERBOSE
     std::cout << "[BinaryReader::~BinaryReader()] " << std::endl;
@@ -323,8 +324,8 @@ void BinaryWriter::write<std::string>(std::string data)
 {
     FATAL_CHECK_FILE(this->fp);
     int size = data.size();
-    std::cout << fwrite(&size, sizeof(int), 1, this->fp) << std::endl;
-    std::cout << fwrite(data.c_str(), sizeof(char), size, this->fp) << std::endl;
+    write<int>(size);
+    fwrite(data.c_str(), sizeof(char), size, this->fp);
     fpos_t pos;
     FCALL(fgetpos, this->fp, &pos);
     this->cur_pos = pos;
