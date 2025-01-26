@@ -113,8 +113,6 @@ BinaryReader getOrCreateAccountReader()
 {
     BinaryReader reader("res/accounts.bin");
     bool okay = reader.isValid();
-    reader.~BinaryReader(); // explicitly close the file
-
     if (!okay)
     {
         FILE* fp = fopen((std::filesystem::current_path() / "res/accounts.bin").c_str(), "wb");
