@@ -117,9 +117,8 @@ BinaryReader getOrCreateAccountReader()
         FILE* fp = fopen((std::filesystem::current_path() / "res/accounts.bin").c_str(), "wb");
         fclose(fp);
         std::cout << "Account list is empty, created file\n"; // encryption
-        return BinaryReader("res/accounts.bin");
     }
-    return reader;
+    return BinaryReader("res/accounts.bin");
 }
 
 BinaryWriter getOrCreateAccountWriter()
@@ -130,9 +129,9 @@ BinaryWriter getOrCreateAccountWriter()
         FILE* fp = fopen((std::filesystem::current_path() / "res/accounts.bin").c_str(), "wb");
         fclose(fp);
         std::cout << "Account list is empty, created file\n"; // encryption
-        return BinaryWriter("res/accounts.bin"); // just return write spb
     }
-    return writer;
+    // writer goes out of scope so we return a new object
+    return BinaryWriter("res/accounts.bin"); // just return write spb
 }
 
 void listAccounts(MasterPassword &mp)

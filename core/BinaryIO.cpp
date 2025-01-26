@@ -2,6 +2,14 @@
 #include <filesystem>
 #include <exception>
 #include <iostream>
+#include <cerrno>
+
+void checkFileError(const char* operation, FILE* fp) {
+    if (ferror(fp)) {
+        std::cerr << operation << " failed: " << strerror(errno) << std::endl;
+        clearerr(fp);  // Clear the error flag after checking the error
+    }
+}
 
 namespace fs = std::filesystem;
 
@@ -38,6 +46,7 @@ namespace fs = std::filesystem;
 
 #define FCALL(func, ...) if (func(__VA_ARGS__) != 0) {\
     std::cout << "Calling " << #func << " failed inside " << __FUNCTION__ <<std::endl; \
+    checkFileError(#func, this->fp); \
     std::__throw_logic_error("Invalid call"); \
     }
 
@@ -224,7 +233,7 @@ std::string BinaryReader::read<std::string>()
 
 BinaryWriter::BinaryWriter(std::string path)
 {
-    if (!this->open(path, "wb"))
+    if (!this->open(path, "wb+"))
         std::__throw_invalid_argument("Invalid path");
 }
 
@@ -302,7 +311,8 @@ void BinaryWriter::write<std::uint8_t>(std::uint8_t data)
     #ifdef BINARY_VERBOSE
     std::cout << "[BinaryWriter::Write( " << data << " )] " << this->cur_pos << std::endl;
     #endif
-    fwrite(&data, sizeof(std::uint8_t), 1, this->fp);
+    std::uint8_t buff = data; // we make temp copy to avoid changing data
+    std::cout << fwrite(&buff, sizeof(std::uint8_t), 1, this->fp) << std::endl;
     fpos_t pos;
     FCALL(fgetpos, this->fp, &pos);
     this->cur_pos = pos;
@@ -313,8 +323,8 @@ void BinaryWriter::write<std::string>(std::string data)
 {
     FATAL_CHECK_FILE(this->fp);
     int size = data.size();
-    fwrite(&size, sizeof(int), 1, this->fp);
-    fwrite(data.c_str(), sizeof(char), size, this->fp);
+    std::cout << fwrite(&size, sizeof(int), 1, this->fp) << std::endl;
+    std::cout << fwrite(data.c_str(), sizeof(char), size, this->fp) << std::endl;
     fpos_t pos;
     FCALL(fgetpos, this->fp, &pos);
     this->cur_pos = pos;
@@ -327,7 +337,8 @@ template <>
 void BinaryWriter::write<int>(int data)
 {
     FATAL_CHECK_FILE(this->fp);
-    fwrite(&data, sizeof(int), 1, this->fp);
+    int buff = data; // we make temp copy to avoid changing data
+    std::cout << fwrite(&buff, sizeof(int), 1, this->fp) << std::endl;
     fpos_t pos;
     FCALL(fgetpos, this->fp, &pos);
     this->cur_pos = pos;
